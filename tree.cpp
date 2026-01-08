@@ -27,6 +27,7 @@ unordered_map<int, int> sum_at_each_level;
 unordered_map<int, vector<int>> value_at_level;
 unordered_map<int, long long> sum;
 map<int, vector<int>> top_view_map;
+vector<vector<int>> allpath;
 vector<int> top;
 
 //----------------------------------------------------------------------
@@ -259,6 +260,50 @@ TreeNode *postorder(vector<int> pre, vector<int> in)
     return postorderhelper(pre, in, preindex, 0, in.size() - 1);
 }
 
+void sum_root(TreeNode *root, vector<int> &path)
+{
+    if (!root)
+    {
+        return;
+    }
+    path.push_back(root->data);
+    if (!root->left && !root->right)
+    {
+        allpath.push_back(path);
+    }
+    else
+    {
+        sum_root(root->left, path);
+        sum_root(root->right, path);
+    }
+    path.pop_back();
+}
+void print_sum_root()
+{
+    for (int i = 0; i < allpath.size(); i++)
+    {
+        cout << "Path: " << i + 1 << "-";
+        for (int j = 0; j < allpath[i].size(); j++)
+        {
+            cout << allpath[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+int sumTree(TreeNode *root)
+{
+    if (!root)
+    {
+        return 0;
+    }
+    int oldVal = root->data;
+    int leftsum = sumTree(root->left);
+    int rightsum = sumTree(root->right);
+    root->data = leftsum + rightsum;
+    return root->data + oldVal;
+}
+
 void functions_tree(TreeNode *root, TreeNode *root1)
 {
     cout << "Height of Tree: " << height(root) << endl;
@@ -283,11 +328,23 @@ void functions_tree(TreeNode *root, TreeNode *root1)
 
     cout << "Lowest Common Ancestor: ";
     cout << lowest_common_ancestor(root, root, root); // 236-M
+    cout << endl;
 
     vector<int> preorder = {1, 2, 5, 4, 3, 7, 6, 9, 8};
     vector<int> inorder = {1, 2, 5, 4, 3, 7, 6, 9, 8};
     TreeNode *post_tree = postorder(preorder, inorder);
     printTree(post_tree);
+
+    cout << "Sum Root----" << endl;
+    vector<int> path;
+    sum_root(root, path);
+    print_sum_root();
+
+    printPreorder(root);
+    cout << endl;
+    cout << "Transform true: " << sumTree(root) << endl;
+    printPreorder(root);
+    cout << endl;
 }
 
 //--------------------------------Main-----------------------

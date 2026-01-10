@@ -304,6 +304,94 @@ int sumTree(TreeNode *root)
     return root->data + oldVal;
 }
 
+int newWidth(TreeNode *root)
+{
+    queue<pair<TreeNode *, unsigned long long>> q;
+    if (root == NULL)
+    {
+        return 0;
+    }
+    q.push({root, 0});
+    unsigned long long max_width = 0;
+    while (!q.empty())
+    {
+        unsigned long long size = q.size();
+        unsigned long long startIdx = q.front().second;
+        unsigned long long endIdx = q.back().second;
+        max_width = max(max_width, endIdx - startIdx + 1);
+        for (int i = 0; i < size; i++)
+        {
+            auto node = q.front();
+            q.pop();
+            if (node.first->left)
+            {
+                q.push({node.first->left, node.second * 2 + 1});
+            }
+            if (node.first->right)
+            {
+                q.push({node.first->right, node.second * 2 + 1});
+            }
+        }
+    }
+    return max_width;
+}
+
+vector<int> morris_algo(TreeNode *root)
+{
+    vector<int> ans;
+    TreeNode *curr = root;
+    while (curr != NULL)
+    {
+        if (curr->left == NULL)
+        {
+            ans.push_back(root->data);
+            curr = curr->right;
+        }
+        else
+        {
+            TreeNode *IP = curr->left;
+            while (IP->right != NULL && IP->right != curr)
+            {
+                IP = IP->right;
+            }
+            if (IP->right == NULL)
+            {
+                IP->right = curr;
+                curr = curr->left;
+            }
+            else
+            {
+                IP->right = NULL;
+                ans.push_back(curr->data);
+                curr = curr->right;
+            }
+        }
+    }
+    return ans;
+}
+
+void flatten(TreeNode *root)
+{
+    if (!root)
+        return;
+
+    flatten(root->left);
+    flatten(root->right);
+
+    if (root->left)
+    {
+        TreeNode *temp = root->right;
+        root->right = root->left;
+        root->left = NULL;
+
+        TreeNode *curr = root->right;
+        while (curr->right)
+            curr = curr->right;
+
+        curr->right = temp;
+    }
+}
+
 void functions_tree(TreeNode *root, TreeNode *root1)
 {
     cout << "Height of Tree: " << height(root) << endl;
@@ -344,6 +432,28 @@ void functions_tree(TreeNode *root, TreeNode *root1)
     cout << endl;
     cout << "Transform true: " << sumTree(root) << endl;
     printPreorder(root);
+    cout << endl;
+
+    // Maximum Width of binary tree  -662
+    cout << "Maximum width: " << newWidth(root) << endl;
+
+    // Morris In-order Traversal
+    cout << "Morris In-Order: ";
+    vector<int> morris = morris_algo(root);
+    for (int i = 0; i < morris.size(); i++)
+    {
+        cout << morris[i];
+        if (i != morris.size() - 1)
+        {
+            cout << "->";
+        }
+    }
+    cout << endl;
+
+    cout << "Flatten LinkList: ";
+    TreeNode *rootcopy = root;
+    flatten(rootcopy);
+    printPreorder(rootcopy);
     cout << endl;
 }
 
